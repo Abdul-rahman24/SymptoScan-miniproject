@@ -3,27 +3,32 @@ import pandas as pd
 import numpy as np
 import pickle
 from collections import Counter
-import json
+import os
 
 app = Flask(__name__)
 
 # --- LOAD MODELS & DATA ---
-with open('models/disease_model.pkl', 'rb') as f:
+# Using absolute paths is safer for cloud deployments
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, 'models', 'disease_model.pkl')
+DATA_DIR = os.path.join(BASE_DIR, 'data')
+
+with open(MODEL_PATH, 'rb') as f:
     data = pickle.load(f)
     model = data['model']
     all_symptoms = data['symptoms']
 
-descriptions_df = pd.read_csv('data/symptom_Description.csv')
+descriptions_df = pd.read_csv(os.path.join(DATA_DIR, 'symptom_Description.csv'))
 descriptions_df['Disease'] = descriptions_df['Disease'].str.strip()
 
-precautions_df = pd.read_csv('data/symptom_precaution.csv')
+precautions_df = pd.read_csv(os.path.join(DATA_DIR, 'symptom_precaution.csv'))
 precautions_df['Disease'] = precautions_df['Disease'].str.strip()
 
-severity_df = pd.read_csv('data/Symptom-severity.csv')
+severity_df = pd.read_csv(os.path.join(DATA_DIR, 'Symptom-severity.csv'))
 severity_df['Symptom'] = severity_df['Symptom'].str.strip()
 severity_dict = dict(zip(severity_df['Symptom'], severity_df['weight']))
 
-df = pd.read_csv('data/dataset.csv')
+df = pd.read_csv(os.path.join(DATA_DIR, 'dataset.csv'))
 cols = [i for i in df.columns if i != 'Disease']
 for col in cols:
     df[col] = df[col].astype(str).str.strip()
@@ -31,7 +36,6 @@ for col in cols:
 @app.route('/')
 def home():
     sorted_symptoms = sorted([s for s in all_symptoms])
-    # Create a dictionary of { "original_symptom": "Pretty Symptom" }
     symptom_dict = {s: s.replace('_', ' ').title() for s in sorted_symptoms}
     return render_template('index.html', symptoms=symptom_dict)
 
@@ -91,5 +95,8 @@ def predict():
         'high_risk': high_risk_flag
     })
 
+# This ensures it runs correctly whether in dev or production
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Render assigns a dynamic port, so we read it from the environment variables
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
