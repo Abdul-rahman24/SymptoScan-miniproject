@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SymptoScan | AI Diagnostics</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-shape shape-1"></div>
+    <div class="background-shape shape-2"></div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Sympto<span>Scan</span></h1>
+            <p>Enter or speak your clinical symptoms for an early AI diagnosis</p>
+        </header>
+
+        <div class="card" id="main-card">
+            
+            <script type="application/json" id="symptoms-data">
+                {{ symptoms | tojson | safe }}
+            </script>
+
+            <div id="form-section">
+                <div class="wizard-step" id="step-1">
+                    <h3>Step 1 of 3</h3>
+                    <label>How are you feeling today?</label>
+
+                    <div class="custom-dropdown" id="symptom1-container">
+                        <div class="input-with-mic">
+                            <input type="text" id="symptom1-input" class="search-input" placeholder="Type or click the mic to speak..." autocomplete="off">
+                            <button type="button" id="btn-voice" class="mic-btn" title="Speak your symptom">🎤</button>
+                        </div>
+                        <p id="voice-status" class="voice-status"></p>
+                        <input type="hidden" id="symptom1-value">
+                        <ul class="dropdown-list" id="symptom1-list"></ul>
+                    </div>
+
+                    <button type="button" class="btn-predict step-btn" id="btn-to-step2" style="margin-top: 20px;">Next →</button>
+                </div>
+
+                <div class="wizard-step" id="step-2" style="display: none;">
+                    <h3>Step 2 of 3</h3>
+                    <label>People with that symptom often experience these. Do you have any?</label>
+                    <div id="dynamic-symptoms-container" class="checkbox-grid"></div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="button" class="btn-predict step-btn back-btn" data-target="step-1">← Back</button>
+                        <button type="button" class="btn-predict step-btn" data-target="step-3">Next →</button>
+                    </div>
+                </div>
+
+                <div class="wizard-step" id="step-3" style="display: none;">
+                    <h3>Step 3 of 3</h3>
+                    <label>Any other symptoms we should know about?</label>
+                    
+                    <div class="custom-dropdown">
+                        <input type="text" id="symptom_extra_1_input" class="search-input" placeholder="Search additional symptom..." autocomplete="off">
+                        <input type="hidden" id="symptom_extra_1_value">
+                        <ul class="dropdown-list" id="symptom_extra_1_list"></ul>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="button" class="btn-predict step-btn back-btn" data-target="step-2">← Back</button>
+                        <button type="button" id="btn-submit" class="btn-predict">Analyze Symptoms 🔍</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="skeleton-section" style="display: none;">
+                <p class="skeleton-text" style="width: 150px; height: 15px; margin-bottom: 20px;"></p>
+                <div class="skeleton-title"></div>
+                <div class="skeleton-box"></div>
+                <div class="skeleton-text" style="width: 200px; height: 25px; margin: 25px 0 15px 0;"></div>
+                <div class="skeleton-list"></div>
+                <div class="skeleton-list"></div>
+                <div class="skeleton-list" style="width: 70%;"></div>
+            </div>
+
+            <div id="result-section" style="display: none;">
+                <div id="risk-warning" class="warning-banner" style="display: none;">
+                    <strong>⚠️ HIGH SEVERITY DETECTED:</strong> Please seek immediate medical attention or consult a healthcare professional.
+                </div>
+
+                <p style="color: #a3aed1; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Predicted Diagnosis</p>
+                <h1 id="res-disease" class="result-title"></h1>
+                
+                <div class="description-box">
+                    <p style="color: #2b3674;"><strong>About:</strong> <span id="res-description"></span></p>
+                </div>
+
+                <h3 style="margin: 25px 0 15px 0; color: #2b3674;">Recommended Precautions</h3>
+                <ul id="res-precautions" class="precaution-list"></ul>
+
+                <button type="button" id="btn-new-scan" class="btn-back">← Analyze New Symptoms</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
